@@ -13,8 +13,7 @@ namespace propterHoc {
 
         public bool IsSaveLoaded { get; private set; } = false;
         public event EventHandler<SaveLoadedEventArgs> SaveLoaded;
-
-        
+        private WorldData _data;
 
         protected virtual void OnSaveLoaded(SaveLoadedEventArgs e) {
             SaveLoaded?.Invoke(this, e);
@@ -26,7 +25,7 @@ namespace propterHoc {
             BackupDirectory = BackupDirectoryDefault;
         }
 
-        private WorldData _data;
+        
         public string BackupDirectoryDefault { get; } =  nameof(propterHoc)+"backup";
         public string BackupDirectory { get; set; }
         public int MaxNumberOfBackups { get; set; } = 2;
@@ -70,11 +69,12 @@ namespace propterHoc {
                 File.Copy(fileName, Path.Combine(backupDirectory, backupFile), true);
                 
             }
-            
 
-            XmlSerializer ser = new XmlSerializer(typeof(WorldData));
+
+
+            var ser = new XmlSerializer(typeof(WorldData), Serialization.Types.ToArray());
             using (XmlReader reader = XmlReader.Create(fileName)) {
-                _data = (WorldData) ser.Deserialize(reader);
+               _data = (WorldData) ser.Deserialize(reader);
             }
 
 
@@ -90,17 +90,21 @@ namespace propterHoc {
                 return false;
             }
 
-            
+
 
             XmlSerializer ser = new XmlSerializer(typeof(WorldData));
-            try {
-                using (FileStream fs = new FileStream(fileName, FileMode.Create)) {
-                    using (XmlWriter writer = XmlWriter.Create(fs, new XmlWriterSettings {Indent = true})) {
+            try
+            {
+                using (FileStream fs = new FileStream(fileName, FileMode.Create))
+                {
+                    using (XmlWriter writer = XmlWriter.Create(fs, new XmlWriterSettings { Indent = true }))
+                    {
                         ser.Serialize(writer, _data);
                     }
                 }
             }
-            catch (System.Security.SecurityException ex) {
+            catch (System.Security.SecurityException ex)
+            {
                 Trace.WriteLine("Did not have required permission to access file", "[INFO]");
                 Trace.WriteLine(ex.Message, "[DEBUG]");
                 return false;
@@ -108,6 +112,7 @@ namespace propterHoc {
             return true;
         }
 
+        
         public StructureSaveData SelectComputerByName(string name) {
 
             return (StructureSaveData) _data.Things.FirstOrDefault(x =>
@@ -116,11 +121,11 @@ namespace propterHoc {
 
         }
 
-        public T SelectSingleThing<T>(Func<WorldDataThingsThingSaveData, bool> wherePredicate) where  T : WorldDataThingsThingSaveData {
+        public T SelectSingleThing<T>(Func<ThingSaveData, bool> wherePredicate) where  T : ThingSaveData {
             return (T) _data.Things.FirstOrDefault(e => e.GetType() == typeof(T) && wherePredicate(e));
         }
 
-        public List<string> GetThingsReferenceIDs(Func<WorldDataThingsThingSaveData, bool> wherePredicate ) {
+        public List<long> GetThingsReferenceIDs(Func<ThingSaveData, bool> wherePredicate ) {
 
             return _data.Things.Where(wherePredicate).Select(x => x.ReferenceId).ToList();
         }
