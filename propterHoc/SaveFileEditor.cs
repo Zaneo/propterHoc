@@ -73,9 +73,6 @@ namespace propterHoc {
 
 
             var ser = new XmlSerializer(typeof(WorldData), Serialization.Types.ToArray());
-            //var ns = new XmlSerializerNamespaces();
-
-            //var ser = new XmlSerializer(typeof(WorldData));
             using (XmlReader reader = XmlReader.Create(fileName)) {
                _data = (WorldData) ser.Deserialize(reader);
             }
@@ -93,25 +90,29 @@ namespace propterHoc {
                 return false;
             }
 
-            
 
-            //XmlSerializer ser = new XmlSerializer(typeof(WorldData));
-            //try {
-            //    using (FileStream fs = new FileStream(fileName, FileMode.Create)) {
-            //        using (XmlWriter writer = XmlWriter.Create(fs, new XmlWriterSettings {Indent = true})) {
-            //            ser.Serialize(writer, _data);
-            //        }
-            //    }
-            //}
-            //catch (System.Security.SecurityException ex) {
-            //    Trace.WriteLine("Did not have required permission to access file", "[INFO]");
-            //    Trace.WriteLine(ex.Message, "[DEBUG]");
-            //    return false;
-            //}
+
+            XmlSerializer ser = new XmlSerializer(typeof(WorldData));
+            try
+            {
+                using (FileStream fs = new FileStream(fileName, FileMode.Create))
+                {
+                    using (XmlWriter writer = XmlWriter.Create(fs, new XmlWriterSettings { Indent = true }))
+                    {
+                        ser.Serialize(writer, _data);
+                    }
+                }
+            }
+            catch (System.Security.SecurityException ex)
+            {
+                Trace.WriteLine("Did not have required permission to access file", "[INFO]");
+                Trace.WriteLine(ex.Message, "[DEBUG]");
+                return false;
+            }
             return true;
         }
 
-        /*
+        
         public StructureSaveData SelectComputerByName(string name) {
 
             return (StructureSaveData) _data.Things.FirstOrDefault(x =>
@@ -120,15 +121,14 @@ namespace propterHoc {
 
         }
 
-        public T SelectSingleThing<T>(Func<WorldDataThingsThingSaveData, bool> wherePredicate) where  T : WorldDataThingsThingSaveData {
+        public T SelectSingleThing<T>(Func<ThingSaveData, bool> wherePredicate) where  T : ThingSaveData {
             return (T) _data.Things.FirstOrDefault(e => e.GetType() == typeof(T) && wherePredicate(e));
         }
 
-        public List<string> GetThingsReferenceIDs(Func<WorldDataThingsThingSaveData, bool> wherePredicate ) {
+        public List<long> GetThingsReferenceIDs(Func<ThingSaveData, bool> wherePredicate ) {
 
             return _data.Things.Where(wherePredicate).Select(x => x.ReferenceId).ToList();
         }
-        */
 
     }
 }
